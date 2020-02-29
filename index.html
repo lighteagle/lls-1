@@ -108,10 +108,10 @@
             <div class="chart-header mp">
               <div>
                 <i style="font-size:20px" class="far">&#xf073;</i>
-                <span></span>
+                &nbsp;<span id="date-header"></span>
               </div>
 
-              <div>Time</div>
+              <div id="time"></div>
             </div>
             <div id="viewDiv"></div>
           </div>
@@ -554,6 +554,31 @@
           }
         }
       });
+    </script>
+    <script>
+      const dateHeader = new Date();
+      const formattedDate = dateHeader
+        .toLocaleDateString("ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        })
+        .replace(/ /g, " ");
+      // console.log(formattedDate);
+      let ctxDateHeader = document.getElementById("date-header");
+      ctxDateHeader.textContent = formattedDate;
+
+      function realtime() {
+        let time = moment().format("hh:mm ");
+        document.getElementById("time").innerHTML = time;
+
+        setInterval(() => {
+          time = moment().format("hh:mm");
+          document.getElementById("time").innerHTML = time;
+        }, 1000);
+      }
+
+      realtime();
     </script>
   </body>
 </html>
