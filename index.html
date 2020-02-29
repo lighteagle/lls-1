@@ -564,9 +564,7 @@
           year: "numeric"
         })
         .replace(/ /g, " ");
-      // console.log(formattedDate);
-      let ctxDateHeader = document.getElementById("date-header");
-      ctxDateHeader.textContent = formattedDate;
+      document.getElementById("date-header").textContent = formattedDate;
 
       function realtime() {
         let time = moment().format("h:mm A");
