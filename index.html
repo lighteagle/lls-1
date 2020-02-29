@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js
+   "></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css"
+    />
+
+    <!-- ArcGis Setup -->
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.14/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.14/"></script>
+    <script>
+      var map, view;
+
+      require([
+        "esri/Map",
+        // "esri/views/SceneView",
+        "esri/views/MapView",
+        "esri/widgets/Search",
+        "esri/widgets/BasemapToggle",
+        "esri/widgets/Compass",
+        "esri/tasks/support/LegendLayer"
+      ], function(Map, MapView, Search, BasemapToggle, Compass, LegendLayer) {
+        let map = new Map({
+          basemap: "gray"
+        });
+
+        let view = new MapView({
+          map: map,
+          container: "viewDiv",
+          zoom: 6,
+          center: [109, -6.5]
+        });
+
+        let search = new Search({
+          view: view
+        });
+        var compass = new Compass({
+          view: view
+        });
+        var toggle = new BasemapToggle({
+          view: view,
+          nextBasemap: "hybrid"
+        });
+        // Adds an instance of BasemapToggle widget to the
+        // top right of the view's container.
+        view.ui.add(search, "top-right");
+        view.ui.add([compass, toggle], "top-leading");
+      });
+    </script>
+  </head>
+  <body>
+    <nav class="navbar bg-custom">
+      <a class="navbar-brand" href="#">
+        <img src="Danone.png" class="d-inline-block align-top" alt="" />
+        <h1>Danone</h1>
+      </a>
+      <div class="nav-user">User ID <img src="user.png" /></div>
+    </nav>
+
+    <main>
+      <div class="row">
+        <div class="col-md-3">
+          <div class="part lu">
+            <div class="chart-header">
+              Top 10 Agen (Sebelum toko): High Sales
+            </div>
+            <div style="padding: 10px">
+              <canvas id="myChart-lu" height="300" width="400"></canvas>
+            </div>
+          </div>
+          <div class="part lb">
+            <div class="chart-header">
+              Top 10 Agen (Sebelum toko): Low Sales
+            </div>
+            <div style="padding: 10px">
+              <canvas id="myChart-lb" height="300" width="400"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="part cu">
+            <div
+              id="viewDiv"
+              style="padding: 10px; margin:10px; border: 1px solid black;"
+            ></div>
+          </div>
+          <div class="part cc"></div>
+          <div class="part cb row">
+            <div class="col-md-6">
+              <div class="chart-header">
+                Monthly Sales Sufor dan Vitamin
+              </div>
+              <div style="padding: 10px">
+                <canvas id="myChart-cb1" height="300" width="500"></canvas>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="chart-header">
+                Monthly Sales Sufor dan Vitamin
+              </div>
+              <div style="padding: 10px">
+                <canvas id="myChart-cb2" height="300" width="500"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="part ru">
+            <div class="chart-header">
+              Monthly Grafik Garis Klasifikasi
+            </div>
+            <div style="padding: 10px">
+              <canvas id="myChart-ru" height="150" width="400"></canvas>
+            </div>
+            <div style="font-size: 10px; padding: 0px 30px; color: gray">
+              Untuk Mengetahui populasi toko yang sudah naik kelas / turun kelas
+              dalam 3 bulan terakhir
+            </div>
+          </div>
+          <div class="part rc">
+            <div class="chart-header">
+              Monthly Sales Graphic / Product Items
+            </div>
+            <div style="padding: 10px">
+              <canvas id="myChart-rc" height="150" width="400"></canvas>
+            </div>
+            <div style="font-size: 10px; padding: 0px 30px; color: gray">
+              Untuk Mengetahui populasi toko yang sudah naik kelas / turun kelas
+              dalam 6 bulan terakhir
+            </div>
+          </div>
+          <div class="part rb">
+            <div class="chart-header">
+              Total Graphic Sales Kumulatif (IDR)
+            </div>
+            <div style="padding: 10px">
+              <canvas id="myChart-rb" height="150" width="400"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bootstrap Script -->
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      //   ======= Data ======================
+      const data = {
+        labels: [
+          "Toko 1",
+          "Toko 2",
+          "Toko 3",
+          "Toko 4",
+          "Toko 5",
+          "Toko 6",
+          "Toko 7",
+          "Toko 8",
+          "Toko 9",
+          "Toko 10"
+        ],
+        labels3: ["Sufor", "Vitamin"],
+        bulan: [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "Mei",
+          "Jun",
+          "Jul",
+          "Ags",
+          "Sep",
+          "Okt",
+          "Nov",
+          "Des"
+        ],
+        data: [88, 72, 65, 62, 46, 42, 35, 29, 21, 16],
+        data2: [16, 21, 29, 35, 42, 46, 62, 65, 72, 88],
+        data3: [40, 60],
+        data4: [65, 35],
+        dataA: [100, 110, 130, 90, 140],
+        dataB: [105, 145, 85, 80, 120],
+        dataC: [140, 150, 170, 160, 130],
+        dataD: [60, 160, 150, 170, 50],
+        dataX: [
+          0,
+          100000,
+          50000,
+          150000,
+          100000,
+          200000,
+          150000,
+          250000,
+          200000,
+          300000,
+          250000,
+          350000
+        ]
+      };
+
+      var date = new Date();
+      var dateSeries = [];
+      for (i = 0; i < 90; i++) {
+        date.setDate(date.getDate() + 1);
+        var dmy =
+          date.getDate() +
+          "-" +
+          (date.getMonth() + 1) +
+          "-" +
+          date
+            .getFullYear()
+            .toString()
+            .substr(-2);
+        dateSeries.push(dmy);
+      }
+      console.log(dateSeries);
+
+      const dataSeries1 = Array.from({ length: 90 }, () =>
+        Math.floor(20 + Math.random() * 40)
+      );
+      const dataSeries2 = Array.from({ length: 90 }, () =>
+        Math.floor(20 + Math.random() * 40)
+      );
+      const dataSeries3 = Array.from({ length: 90 }, () =>
+        Math.floor(20 + Math.random() * 40)
+      );
+      const dataSeries4 = Array.from({ length: 90 }, () =>
+        Math.floor(20 + Math.random() * 40)
+      );
+
+      //   =============== end Data =============
+      const optLc = {
+        animation: {
+          duration: 1,
+          onComplete: function() {
+            var chartInstance = this.chart,
+              ctx = chartInstance.ctx;
+
+            ctx.font = Chart.helpers.fontString(
+              Chart.defaults.global.defaultFontSize,
+              Chart.defaults.global.defaultFontStyle,
+              Chart.defaults.global.defaultFontFamily
+            );
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            this.data.datasets.forEach(function(dataset, i) {
+              var meta = chartInstance.controller.getDatasetMeta(i);
+              meta.data.forEach(function(bar, index) {
+                var data = dataset.data[index];
+                ctx.fillText(data, bar._model.x - 10, bar._model.y + 5);
+              });
+            });
+          }
+        },
+        legend: { display: false },
+
+        scales: {
+          xAxes: [
+            {
+              display: false,
+              gridLines: {
+                display: false
+              }
+            }
+          ],
+          yAxes: [
+            {
+              gridLines: {
+                display: false
+              }
+            }
+          ]
+        }
+      };
+
+      let ctxLu = document.getElementById("myChart-lu").getContext("2d");
+      let ctxLb = document.getElementById("myChart-lb").getContext("2d");
+      let ctxCb1 = document.getElementById("myChart-cb1").getContext("2d");
+      let ctxCb2 = document.getElementById("myChart-cb2").getContext("2d");
+      let ctxRu = document.getElementById("myChart-ru").getContext("2d");
+      let ctxRc = document.getElementById("myChart-rc").getContext("2d");
+      let ctxRb = document.getElementById("myChart-rb").getContext("2d");
+
+      //   Chart Kiri Atas ===========================================================
+      let myChartLu = new Chart(ctxLu, {
+        type: "horizontalBar",
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              data: data.data,
+              backgroundColor: "lightblue"
+            }
+          ]
+        },
+        options: optLc
+      });
+
+      //   Chart Kiri Bawah ===========================================================
+
+      let myChartLb = new Chart(ctxLb, {
+        type: "horizontalBar",
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              data: data.data2,
+              backgroundColor: "blue"
+            }
+          ]
+        },
+        options: optLc
+      });
+      //   Chart Tengah 1 ===========================================================
+
+      var myPieChart = new Chart(ctxCb1, {
+        type: "pie",
+        data: {
+          datasets: [
+            {
+              data: data.data3,
+              backgroundColor: ["darkorange", "yellow"]
+            }
+          ],
+          labels: data.labels3
+        },
+        options: {
+          rotation: -0.6 * Math.PI,
+          legend: { position: "right" }
+        }
+      });
+
+      //   Chart Tengah 2 ===========================================================
+      var myPieChart2 = new Chart(ctxCb2, {
+        type: "pie",
+        data: {
+          datasets: [
+            {
+              data: data.data4,
+              backgroundColor: ["darkorange", "yellow"]
+            }
+          ],
+          labels: data.labels3
+        },
+        options: {
+          rotation: 0.3 * Math.PI,
+          legend: { position: "right" }
+        }
+      });
+
+      //   Chart Kanan Atas ===========================================================
+      let myChartRu = new Chart(ctxRu, {
+        type: "line",
+        data: {
+          labels: dateSeries,
+          datasets: [
+            {
+              data: dataSeries1,
+              pointRadius: 0,
+              strokeColor: "red",
+              fill: false
+            },
+            {
+              data: dataSeries2,
+              pointRadius: 0,
+              strokeColor: "blue",
+              fill: false
+            },
+            {
+              data: dataSeries3,
+              pointRadius: 0,
+              strokeColor: "green",
+              fill: false
+            },
+            {
+              data: dataSeries4,
+              pointRadius: 0,
+              strokeColor: "orange",
+              fill: false
+            }
+          ]
+        },
+        options: {
+          legend: { display: false },
+          scales: {
+            xAxes: [
+              {
+                ticks: {
+                  fontSize: 6,
+                  maxRotation: 90,
+                  minRotation: 90
+                },
+                gridLines: {
+                  display: false
+                }
+              }
+            ],
+            yAxes: [
+              {
+                ticks: {
+                  fontSize: 6,
+                  max: 100,
+                  min: 0,
+                  stepSize: 10
+                }
+              }
+            ]
+          }
+        }
+      });
+
+      //   Chart Kanan Tengah ===========================================================
+      let myChartRc = new Chart(ctxRc, {
+        type: "bar",
+        data: {
+          labels: [
+            "Strategy 1",
+            "Strategy 2",
+            "Strategy 3",
+            "Strategy 4",
+            "Strategy 5"
+          ],
+          datasets: [
+            {
+              data: data.dataA,
+              backgroundColor: "lightblue"
+            },
+            {
+              data: data.dataB,
+              backgroundColor: "blue"
+            },
+            {
+              data: data.dataC,
+              backgroundColor: "darkorange"
+            },
+            {
+              data: data.dataD,
+              backgroundColor: "lightgreen"
+            }
+          ]
+        },
+        options: {
+          legend: { display: false },
+          scales: {
+            xAxes: [
+              {
+                ticks: {
+                  fontSize: 6
+                },
+                gridLines: {
+                  display: false
+                }
+              }
+            ],
+            yAxes: [
+              {
+                ticks: {
+                  fontSize: 6,
+                  max: 200,
+                  min: 0,
+                  stepSize: 50
+                }
+              }
+            ]
+          }
+        }
+      });
+
+      // CHart Kanan Bawah =======================================================
+      let myChartRb = new Chart(ctxRb, {
+        type: "line",
+        data: {
+          labels: data.bulan,
+          datasets: [
+            {
+              data: data.dataX,
+              pointRadius: 2,
+              borderColor: "blue",
+              strokeColor: "blue",
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          legend: { display: false },
+          scales: {
+            xAxes: [
+              {
+                ticks: {
+                  fontSize: 10,
+                  stepSize: 3
+                },
+                gridLines: {
+                  display: false
+                }
+              }
+            ],
+            yAxes: [
+              {
+                ticks: {
+                  fontSize: 6,
+                  max: 400000,
+                  min: 0,
+                  stepSize: 50000
+                }
+              }
+            ]
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
